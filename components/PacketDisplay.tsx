@@ -1,5 +1,4 @@
 "use client";
-
 import { useEffect, useState } from "react";
 import pusherClient from "../lib/pusher";
 import {
@@ -24,7 +23,6 @@ import {
   ChartTooltip,
   ChartTooltipContent,
 } from "@/components/ui/chart";
-
 type Packet = {
   source_port: number;
   timestamp: string;
@@ -35,27 +33,13 @@ type Packet = {
   request_line: string;
   status: string;
 };
-
 export default function PacketDisplay() {
   const [packets, setPackets] = useState<Packet[]>([]);
   const [chartData, setChartData] = useState<
     { timestamp: string; length: number }[]
   >([]);
-
   useEffect(() => {
     const channel = pusherClient.subscribe("packet-channel");
-
-    // Modified to handle batch updates
-    channel.bind("packet-batch-event", (data: Packet[]) => {
-      setPackets((prevPackets) => {
-        // Merge new packets with existing ones, keeping the latest 1000
-        const newPackets = [...data, ...prevPackets].slice(0, 1000);
-        updateChartData(newPackets);
-        return newPackets;
-      });
-    });
-
-    // Keep the original single packet handler for backwards compatibility
     channel.bind("packet-event", (data: Packet) => {
       setPackets((prevPackets) => {
         const newPackets = [data, ...prevPackets.slice(0, 999)];
@@ -63,56 +47,32 @@ export default function PacketDisplay() {
         return newPackets;
       });
     });
-
     return () => {
       pusherClient.unsubscribe("packet-channel");
     };
   }, []);
-
   const updateChartData = (packets: Packet[]) => {
-    // Group packets by minute to handle high-frequency updates
-    const packetsByMinute = new Map<
-      string,
-      { count: number; totalLength: number }
-    >();
-
-    packets.slice(0, 100).forEach((packet) => {
-      const minute = packet.timestamp.substring(0, 16); // Get YYYY-MM-DD HH:mm
-      const existing = packetsByMinute.get(minute) || {
-        count: 0,
-        totalLength: 0,
-      };
-      packetsByMinute.set(minute, {
-        count: existing.count + 1,
-        totalLength: existing.totalLength + packet.length,
-      });
-    });
-
-    const newChartData = Array.from(packetsByMinute.entries())
-      .map(([timestamp, data]) => ({
-        timestamp,
-        length: Math.round(data.totalLength / data.count), // Average length per minute
+    const newChartData = packets
+      .slice(0, 20)
+      .map((packet) => ({
+        timestamp: packet.timestamp,
+        length: packet.length,
       }))
-      .sort((a, b) => a.timestamp.localeCompare(b.timestamp))
-      .slice(-20); // Keep last 20 minutes of data
-
+      .reverse();
     setChartData(newChartData);
   };
-
   return (
     <div className="container mx-auto p-4 space-y-6">
       <Card>
         <CardHeader>
           <CardTitle>Packet Length Over Time</CardTitle>
-          <CardDescription>
-            Average packet length per minute (last 20 minutes)
-          </CardDescription>
+          <CardDescription>Visualizing the last 20 packets</CardDescription>
         </CardHeader>
         <CardContent>
           <ChartContainer
             config={{
               length: {
-                label: "Avg Packet Length",
+                label: "Packet Length",
                 color: "hsl(var(--chart-1))",
               },
             }}
@@ -121,10 +81,7 @@ export default function PacketDisplay() {
             <ResponsiveContainer width="100%" height="100%">
               <LineChart data={chartData}>
                 <CartesianGrid strokeDasharray="3 3" />
-                <XAxis
-                  dataKey="timestamp"
-                  tickFormatter={(value) => value.substring(11, 16)} // Show only HH:mm
-                />
+                <XAxis dataKey="timestamp" />
                 <YAxis />
                 <ChartTooltip content={<ChartTooltipContent />} />
                 <Legend />
@@ -132,14 +89,13 @@ export default function PacketDisplay() {
                   type="monotone"
                   dataKey="length"
                   stroke="var(--color-length)"
-                  name="Avg Packet Length"
+                  name="Packet Length"
                 />
               </LineChart>
             </ResponsiveContainer>
           </ChartContainer>
         </CardContent>
       </Card>
-
       <Card>
         <CardHeader>
           <CardTitle>Network Packets</CardTitle>
