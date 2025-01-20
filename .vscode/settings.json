@@ -1,0 +1,30 @@
+{
+  "json.schemas": [],
+  "workbench.colorCustomizations": {
+    "tab.activeBackground": "#16171b",
+    "activityBar.background": "#111316",
+    "sideBar.background": "#17191d",
+    "tab.activeBorder": "#d19a66",
+    "editor.background": "#18181c",
+    "terminal.background": "#1c1e26", // Terminal background
+    "terminal.foreground": "#dcdfe4", // Terminal text color
+    "terminalCursor.background": "#d19a66", // Terminal cursor background
+    "terminalCursor.foreground": "#d19a66", // Terminal cursor foreground
+    "terminal.ansiBlack": "#1e1e2e",
+    "terminal.ansiRed": "#f0363f",
+    "terminal.ansiGreen": "#8bf03e",
+    "terminal.ansiYellow": "#f1b13b",
+    "terminal.ansiBlue": "#45a6eb",
+    "terminal.ansiMagenta": "#c74fec",
+    "terminal.ansiCyan": "#5dbbc1",
+    "terminal.ansiWhite": "#dcdfe4",
+    "terminal.ansiBrightBlack": "#5d6192",
+    "terminal.ansiBrightRed": "#f19d9d",
+    "terminal.ansiBrightGreen": "#94e067",
+    "terminal.ansiBrightYellow": "#f3c061",
+    "terminal.ansiBrightBlue": "#5da8fe",
+    "terminal.ansiBrightMagenta": "#e4baf5",
+    "terminal.ansiBrightCyan": "#8cdfe0",
+    "terminal.ansiBrightWhite": "#ffffff"
+  }
+}
